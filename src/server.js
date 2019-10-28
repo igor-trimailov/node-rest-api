@@ -1,24 +1,27 @@
-import express from 'express'
-import morgan from 'morgan'
-import bodyParser from 'body-parser'
-import mongoose from '../config/database'
+const express = require('express')
+const morgan = require('morgan')
+const bodyParser = require('body-parser')
+const mongoose = require('../config/database')
+const cors = require('cors')
 
 // import configuration
-import config from '../config'
+const config = require('../config')
 
 // import routes
-import users from './routes/users'
-import movies from './routes/movies'
+const users = require('./routes/users')
+const movies = require('./routes/movies')
 
-import { validateUser } from './api/validators/users'
+const validateUser = require('./api/validators/users')
 
 const app = express()
+
+app.use(cors({ origin: 'www.barelyblog.co.uk', optionsSuccessStatus: 200 }))
 
 app.set('secretKey', config.secretKey)
 
 mongoose.connection.on(
   'error',
-  console.error.bind(console, 'MondoDB connection error:')
+  console.error.bind(console, 'MondoDB connection error:'),
 )
 
 app.use(morgan('dev'))
@@ -34,9 +37,8 @@ app.use('/users', users)
 // authenticated route
 app.use('/movies', validateUser, movies)
 
-
-app.use(function (req, res, next) {
-  res.status(404).send("404: page not found")
+app.use(function(req, res, next) {
+  res.status(404).send('404: page not found')
 })
 
 // express and 404?
