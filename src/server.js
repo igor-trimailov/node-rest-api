@@ -15,7 +15,12 @@ const validateUser = require('./api/validators/users')
 
 const app = express()
 
-app.use(cors({ origin: 'www.barelyblog.co.uk', optionsSuccessStatus: 200 }))
+app.use(
+  cors({
+    origin: 'https://gentle-brushlands-92013.herokuapp.com',
+    optionsSuccessStatus: 200,
+  }),
+)
 
 app.set('secretKey', config.secretKey)
 
