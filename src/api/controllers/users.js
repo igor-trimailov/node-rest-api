@@ -50,4 +50,23 @@ module.exports = {
       }
     })
   },
+  getAll: function(req, res, next) {
+    userModel.find({}, function(err, users) {
+      if (err) {
+        next(err)
+      } else {
+        const usersList = users.map(user => {
+          return {
+            name: user.name,
+          }
+        })
+
+        res.json({
+          status: 'success',
+          message: 'user list found',
+          data: { users: usersList },
+        })
+      }
+    })
+  },
 }
