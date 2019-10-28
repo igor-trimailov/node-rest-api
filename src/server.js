@@ -62,6 +62,6 @@ app.get('/favicon.ico', function(req, res) {
   res.sendStatus(204)
 })
 
-app.listen(3000, function() {
+app.listen(process.env.PORT || 3000, function() {
   console.log('Node server listening on port 3000')
 })
