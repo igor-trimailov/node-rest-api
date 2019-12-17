@@ -15,23 +15,19 @@ const validateUser = require('./api/validators/users')
 
 const app = express()
 
-// move to config?
-var whitelist = [
-  'https://gentle-brushlands-92013.herokuapp.com',
-  'http://localhost:3000',
-]
-var corsOptions = {
+// Set up cors whitelist
+const corsOptions = {
   origin: function(origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
+    if (config.corsWhiteList.includes(origin)) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))
     }
   },
 }
-
 app.use(cors(corsOptions))
 
+// set secret key
 app.set('secretKey', config.secretKey)
 
 mongoose.connection.on(
@@ -79,6 +75,7 @@ app.get('/favicon.ico', function(req, res) {
   res.sendStatus(204)
 })
 
-app.listen(process.env.PORT || 5000, function() {
-  console.log('Node server listening on port 3000')
+const port = process.env.PORT || 5000
+app.listen(port, function() {
+  console.log(`Node server listening on port ${port}`)
 })
