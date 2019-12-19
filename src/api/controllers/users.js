@@ -1,4 +1,4 @@
-const userModel = require('../models/users')
+const userModel = require('../models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
@@ -6,18 +6,24 @@ module.exports = {
   create: function(req, res, next) {
     userModel.create(
       {
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
+        ...req.body,
+        posted_on: new Date(),
       },
-      function(err, result) {
+      function(err) {
         if (err) {
-          next(err)
+          if (err.code === 11000) {
+            return res.status(422).send({
+              status: 'error',
+              message: 'duplicate user',
+              data: err.keyValue
+            })
+          } else {
+            next(err)
+          }
         } else {
           res.json({
             status: 'success',
             message: 'User added successfully',
-            data: null,
           })
         }
       }
@@ -38,7 +44,14 @@ module.exports = {
           res.json({
             status: 'success',
             message: 'user found',
-            data: { user: userInfo, token: token },
+            data: {
+              user: {
+                id: userInfo._id,
+                name: userInfo.name,
+                email: userInfo.email,
+                token: token,
+              },
+            },
           })
         } else {
           res.json({
@@ -57,7 +70,9 @@ module.exports = {
       } else {
         const usersList = users.map(user => {
           return {
+            id: user._id,
             name: user.name,
+            email: user.email,
           }
         })
 

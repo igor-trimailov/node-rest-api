@@ -9,19 +9,18 @@ const config = require('../config')
 
 // import routes
 const users = require('./routes/users')
-const movies = require('./routes/movies')
+const posts = require('./routes/posts')
 
-const validateUser = require('./api/validators/users')
-
+// initialize app
 const app = express()
 
-// Set up cors whitelist
+// set up cors whitelist
 const corsOptions = {
   origin: function(origin, callback) {
     if (config.corsWhiteList.includes(origin)) {
       callback(null, true)
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error('Not allowed by CORS. Origin:' + origin))
     }
   },
 }
@@ -30,23 +29,21 @@ app.use(cors(corsOptions))
 // set secret key
 app.set('secretKey', config.secretKey)
 
-mongoose.connection.on(
-  'error',
-  console.error.bind(console, 'MondoDB connection error:'),
-)
+// mongoose.connection.on(
+//   'error',
+//   console.error.bind(console, 'MondoDB connection error:')
+// )
 
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', function(req, res) {
-  res.json({ tutorial: 'Build REST api with node.js' })
+  res.json({ default: 'will send to swagger documentation' })
 })
 
-// public route:
+// public routes:
 app.use('/users', users)
-
-// authenticated route
-app.use('/movies', validateUser, movies)
+app.use('/posts', posts)
 
 app.use(function(req, res, next) {
   res.status(404).send('404: page not found')
@@ -75,7 +72,4 @@ app.get('/favicon.ico', function(req, res) {
   res.sendStatus(204)
 })
 
-const port = process.env.PORT || 5000
-app.listen(port, function() {
-  console.log(`Node server listening on port ${port}`)
-})
+module.exports = app

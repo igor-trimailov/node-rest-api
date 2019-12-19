@@ -8,17 +8,20 @@ const UserSchema = new mongoose.Schema({
     type: String,
     trim: true,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
     trim: true,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
     trim: true,
     required: true,
   },
+  created_on: Date,
 })
 
 // hash user password before saving it into database
