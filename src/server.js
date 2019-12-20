@@ -8,8 +8,7 @@ const cors = require('cors')
 const config = require('../config')
 
 // import routes
-const users = require('./routes/users')
-const posts = require('./routes/posts')
+const routes = require('./routes')
 
 // initialize app
 const app = express()
@@ -37,13 +36,8 @@ app.set('secretKey', config.secretKey)
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({ extended: false }))
 
-app.get('/', function(req, res) {
-  res.json({ default: 'will send to swagger documentation' })
-})
-
 // public routes:
-app.use('/users', users)
-app.use('/posts', posts)
+app.use('/api/v1', routes)
 
 app.use(function(req, res, next) {
   res.status(404).send('404: page not found')

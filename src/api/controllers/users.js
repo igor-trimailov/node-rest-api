@@ -11,15 +11,28 @@ module.exports = {
       },
       function(err) {
         if (err) {
-          if (err.code === 11000) {
+
+          // handle validation errors
+          if (err.name === 'ValidationError') {
+            return res.status(422).send({
+              status: 'error',
+              message: 'Validation error',
+              data: {
+                ...err.errors
+              }
+            })
+          }
+
+          // required field will reply with mongo error, not validator
+          if (err.name === 'MongoError' && err.code === 11000) {
             return res.status(422).send({
               status: 'error',
               message: 'duplicate user',
-              data: err.keyValue
+              data: err.keyValue,
             })
-          } else {
-            next(err)
           }
+
+          next(err)
         } else {
           res.json({
             status: 'success',
