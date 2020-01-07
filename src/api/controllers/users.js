@@ -2,6 +2,8 @@ const userModel = require('../models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+const TOKEN_EXP = 1 * 24 * 60 * 60 * 1000
+
 module.exports = {
   create: function(req, res, next) {
     userModel.create(
@@ -11,19 +13,18 @@ module.exports = {
       },
       function(err) {
         if (err) {
-
           // handle validation errors
           if (err.name === 'ValidationError') {
             return res.status(422).send({
               status: 'error',
               message: 'Validation error',
               data: {
-                ...err.errors
-              }
+                ...err.errors,
+              },
             })
           }
 
-          // required field will reply with mongo error, not validator
+          // duplicate key will reply with mongo error, not validator
           if (err.name === 'MongoError' && err.code === 11000) {
             return res.status(422).send({
               status: 'error',
@@ -51,30 +52,61 @@ module.exports = {
           const token = jwt.sign(
             { id: userInfo._id },
             req.app.get('secretKey'),
-            { expiresIn: '1h' }
+            { expiresIn: '1d' }
           )
 
           res.json({
             status: 'success',
-            message: 'user found',
+            message: 'user authenticated',
             data: {
               user: {
                 id: userInfo._id,
                 name: userInfo.name,
-                email: userInfo.email,
                 token: token,
+                expiration: new Date(Date.now() + TOKEN_EXP),
               },
             },
           })
         } else {
-          res.json({
+          res.status(401).send({
             status: 'error',
-            message: 'invalid email/password',
-            data: null,
+            message: 'invalid credentials',
           })
         }
       }
     })
+  },
+  refresh: function(req, res, next) {
+    // not exactly refresh, will need the consumer to keep track of token
+    // expiry date and ask for a new token while the old one is still active
+    jwt.verify(
+      req.headers['x-access-token'],
+      req.app.get('secretKey'),
+      function(err, decoded) {
+        if (err) {
+          res.status(401).send({
+            status: 'error',
+            message: 'access error',
+          })
+        } else {
+          const token = jwt.sign(
+            { id: decoded._id },
+            req.app.get('secretKey'),
+            { expiresIn: '1d' }
+          )
+
+          res.json({
+            status: 'success',
+            message: 'new token issued',
+            data: {
+              id: decoded.id,
+              newToken: token,
+              expiration: new Date(Date.now() + TOKEN_EXP),
+            },
+          })
+        }
+      }
+    )
   },
   getAll: function(req, res, next) {
     userModel.find({}, function(err, users) {
