@@ -33,7 +33,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 
-// define schema 
+// define schema
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -52,6 +52,12 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
+  recoveryToken: {
+    type: String,
+  },
+  recoveryTokenExp: {
+    type: String,
+  },
   created_on: Date,
 })
 
@@ -61,11 +67,11 @@ UserSchema.pre('save', function(next) {
   next()
 })
 
-UserSchema.pre('validate', function (next) {
+UserSchema.pre('validate', function(next) {
   if (this.password === 'Password1') {
     this.invalidate('password', 'Password is stupid', this.password)
   }
-  next();
+  next()
 })
 
 module.exports = mongoose.model('User', UserSchema)

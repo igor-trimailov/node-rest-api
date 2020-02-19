@@ -1,11 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
-const mongoose = require('../config/database')
+const mongoose = require('./database')
 const cors = require('cors')
 
 // import configuration
-const config = require('../config')
+const { appConfig } = require('./config')
 
 // import routes
 const routes = require('./routes')
@@ -16,7 +16,7 @@ const app = express()
 // set up cors whitelist
 const corsOptions = {
   origin: function(origin, callback) {
-    if (config.corsWhiteList.includes(origin)) {
+    if (appConfig.corsWhiteList.includes(origin)) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS. Origin:' + origin))
@@ -26,12 +26,13 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 // set secret key
-app.set('secretKey', config.secretKey)
+app.set('secretKey', appConfig.secretKey)
 
-// mongoose.connection.on(
-//   'error',
-//   console.error.bind(console, 'MondoDB connection error:')
-// )
+// log mongodb connection errors
+mongoose.connection.on(
+  'error',
+  console.error.bind(console, 'MondoDB connection error:')
+)
 
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({ extended: false }))

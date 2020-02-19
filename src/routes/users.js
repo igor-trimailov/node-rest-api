@@ -7,4 +7,7 @@ router.post('/register', userController.create)
 router.post('/authenticate', userController.authenticate)
 router.post('/refresh', userController.refresh)
 
+router.post('/recover', userController.recover)
+router.post('/reset', userController.reset)
+
 module.exports = router

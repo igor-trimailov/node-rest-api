@@ -62,3 +62,6 @@ typings/
 
 # babel compiled files
 /dist
+
+# external config file that won't be committed
+extconf.js
