@@ -7,7 +7,7 @@ module.exports = {
   secretKey: process.env.APP_SECRET_KEY || 'super-secret-key',
   corsWhiteList: [
     CLIENT_BASE_URL,
-    'http://localhost:5000', // swagger
+    'http://0.0.0.0:5000', // swagger
     undefined, // temporary hack for postman
   ],
 }
