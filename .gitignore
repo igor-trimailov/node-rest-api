@@ -68,3 +68,6 @@ extconf.js
 
 # yarn lock
 yarn.lock
+
+# intellij idea
+.idea/
