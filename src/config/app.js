@@ -8,6 +8,7 @@ module.exports = {
   corsWhiteList: [
     CLIENT_BASE_URL,
     'http://0.0.0.0:5000', // swagger
+    'https://editor.swagger.io', //swagger editor
     undefined, // temporary hack for postman
   ],
 }

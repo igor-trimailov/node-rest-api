@@ -1,32 +1,31 @@
 // Swagger set up
 const options = {
   swaggerDefinition: {
-    openapi: "3.0.0",
+    openapi: "3.0.2",
     info: {
-      title: "Time to document that Express API you built",
+      title: "Blog API",
       version: "1.0.0",
       description:
-        "A test project to understand how easy it is to document and Express API",
+        "Simple API server that is able do CRUD operations on a MongoDB and authenticate users using JWT tokens. The current implementation imitates blog api.",
       license: {
-        name: "MIT",
+        name: "MIT License",
         url: "https://choosealicense.com/licenses/mit/"
       },
       contact: {
-        name: "Swagger",
-        url: "https://swagger.io",
-        email: "Info@SmartBear.com"
+        name: "Igor",
+        url: "https://www.linkedin.com/in/igortrimailov/"
       }
     },
     servers: [
       {
-        url: "http://localhost:5000/api/v1"
+        url: "http://localhost:5000/api/v1",
+        description: "Local server"
       }
     ]
   },
   apis: [
     // note the files need to be referred from the root
-    './src/api/models/user.js',
-    './src/routes/index.js'
+    './doc/openapi.yml'
   ]
 };
 
