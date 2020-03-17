@@ -1,0 +1,80 @@
+openapi: "3.0.2"
+
+info:
+  version: "1.0"
+  title: Blog API
+  description: "Simple API server that is able do CRUD operations on a MongoDB and authenitcate users using JWT tokens. The current implementation immitates blog api."
+  contact:
+    name: Igor
+    url: https://www.linkedin.com/in/igortrimailov/
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local server
+
+tags:
+- name: "Users"
+  description: "User management"
+
+paths:
+  /users/register:
+    post:
+      tags:
+        - "Users"
+      summary: "Create a new user"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+          "200":
+            description: "Successful registration"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+          "422":
+            description: "Validation error"
+
+      parameters:
+      - in: "query"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    User:
+      title: "Create a new user."
+      type: object
+      required:
+      - name
+      - email
+      - password
+      properties:
+        name:
+          type: string
+          description: "Name of the user. Needs to be unique"
+        email:
+          type: string
+          description: "Email of the user needs to be unique. Used as a login. Needs to be unique."
+        password:
+          type: string
+          description: "Password of the user"
+        created_on:
+          type: integer
+          description: "Date when the user was added to the system."
+        recoveryToken:
+          type: string
+          description: "Password recovery token, used when an user requests their password recovered. If the token matches what is in the database and is not expired, the user is allowed to send in a new password. It gets deleted after a new password is inserted."
+        recoveryTokenExp:
+          type: string
+          description: "An ISO date representing the password token expiry date."
+
+externalDocs:
+  description: Documentation and main site (TBD)
+  url: https://sunrise-sunset.org/api

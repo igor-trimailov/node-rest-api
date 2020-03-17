@@ -1,33 +1,3 @@
-/**
- * @swagger
- *  components:
- *    schemas:
- *      User:
- *        type: object
- *        required:
- *          - name
- *          - email
- *          - password
- *        properties:
- *          name:
- *            type: string
- *            description: Name of the user, needs to be unique
- *          email:
- *            type: string
- *            format: email
- *            description: Email of the user needs to be unique. Used as a login.
- *          password:
- *            type: string
- *            description: Password of the user
- *          created_on:
- *            type: string
- *            format: datetime
- *            description: Date when the user was added to the system.
- *          example:
- *            name: Zed
- *            email: zed@dead.com
- *            password: Password1
- */
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
