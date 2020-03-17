@@ -24,7 +24,7 @@ module.exports = {
               status: 'error',
               message: 'Validation error',
               data: {
-                ...err.errors,
+                message: err.errors[Object.keys(err.errors)[0]].message,
               },
             })
           }
@@ -33,8 +33,10 @@ module.exports = {
           if (err.name === 'MongoError' && err.code === 11000) {
             return res.status(422).send({
               status: 'error',
-              message: 'duplicate user',
-              data: err.keyValue,
+              message: 'Validation error',
+              data: {
+                message: 'User name or password already in use',
+              },
             })
           }
 

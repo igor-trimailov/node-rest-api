@@ -8,7 +8,6 @@
  *          - name
  *          - email
  *          - password
- *          - created_on
  *        properties:
  *          name:
  *            type: string
@@ -67,11 +66,15 @@ UserSchema.pre('save', function(next) {
   next()
 })
 
-UserSchema.pre('validate', function(next) {
-  if (this.password === 'Password1') {
-    this.invalidate('password', 'Password is stupid', this.password)
-  }
-  next()
-})
+// validate email
+UserSchema.path('email').validate(function(email) {
+  var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
+  return emailRegex.test(email)
+}, 'The e-mail needs to be real')
+
+// validate password
+UserSchema.path('password').validate(function(password) {
+  return password !== 'Password1'
+}, 'The password cannot be stupid')
 
 module.exports = mongoose.model('User', UserSchema)
