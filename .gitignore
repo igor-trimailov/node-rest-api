@@ -65,3 +65,6 @@ typings/
 
 # external config file that won't be committed
 extconf.js
+
+# yarn lock
+yarn.lock
