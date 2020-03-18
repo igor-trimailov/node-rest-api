@@ -19,8 +19,7 @@ tags:
 paths:
   /users/register:
     post:
-      tags:
-        - "Users"
+      tags: [Users]
       summary: "Create a new user"
       requestBody:
         required: true
@@ -45,11 +44,21 @@ paths:
         required: true
         schema:
           $ref: "#/components/schemas/User"
-
+  /users:
+    get:
+      tags: [Users]
+      summary: "List all users"
+      responses:
+        200:
+          description: "User list found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
 components:
   schemas:
     User:
-      title: "Create a new user."
+      title: "Create a new user"
       type: object
       required:
       - name
@@ -74,7 +83,37 @@ components:
         recoveryTokenExp:
           type: string
           description: "An ISO date representing the password token expiry date."
-
+    
+    UserResponse:
+      title: "User response"
+      type: object
+      properties:
+        id:
+          type: string
+          example: "5e711a37d1e2f09b068ca714"
+        name:
+          type: string
+          example: "Madi"
+        email:
+          type: string
+          example: "email@example.com"
+    UserListResponse:
+      title: "User list response"
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "user list found"
+        data:
+          type: object
+          properties:
+            users:
+              type: array
+              items:
+                  $ref: "#/components/schemas/UserResponse"
 externalDocs:
   description: Documentation and main site (TBD)
   url: https://sunrise-sunset.org/api
