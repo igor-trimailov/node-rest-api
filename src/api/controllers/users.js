@@ -154,9 +154,6 @@ module.exports = {
     // is sent to user via email as part of recovery link
     const recoveryToken = generateRecoveryToken()
 
-
-    console.warn('recovery token: ', recoveryToken)
-
     userModel.findOneAndUpdate(
       { email: req.body.email },
       {
