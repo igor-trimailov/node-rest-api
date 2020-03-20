@@ -9,16 +9,16 @@ const options = {
       license: {
         name: "MIT License",
         url: "https://choosealicense.com/licenses/mit/"
-      },
-      contact: {
-        name: "Igor",
-        url: "https://www.linkedin.com/in/igortrimailov/"
       }
     },
     servers: [
       {
         url: "http://localhost:5000/api/v1",
         description: "Local server"
+      },
+      {
+        url: "https://stark-brushlands-58685.herokuapp.com/api/v1",
+        description: "Production server"
       }
     ]
   },
