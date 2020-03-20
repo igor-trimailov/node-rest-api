@@ -154,11 +154,14 @@ module.exports = {
     // is sent to user via email as part of recovery link
     const recoveryToken = generateRecoveryToken()
 
+
+    console.warn('recovery token: ', recoveryToken)
+
     userModel.findOneAndUpdate(
       { email: req.body.email },
       {
         recoveryToken,
-        recoveryTokenExp: isoDateWithOffset(transportConfig.recoveryTokenExp),
+        recoveryTokenExp: isoDateWithOffset(transportConfig.transportTokenExp),
       },
       function(err, userInfo) {
         if (err) {
@@ -195,7 +198,7 @@ module.exports = {
   // - update password in db
   reset: function(req, res, next) {
     userModel.findOne(
-      { email: req.body.email, token: req.body.recoveryToken },
+      { email: req.body.email, recoveryToken: req.body.recoveryToken },
       function(err, userInfo) {
         if (err) {
           next(err)
@@ -208,8 +211,7 @@ module.exports = {
           } else {
             // check if token is expired
             const expiredToken =
-              new Date(userInfo.recoveryTokenExp).toISOString() >
-              isoDateWithOffset(-1 * appConfig.tokenExp)
+              new Date(userInfo.recoveryTokenExp) < new Date()
 
             // token is not expired and there was a user token to being with
             if (!expiredToken && userInfo.recoveryToken) {
