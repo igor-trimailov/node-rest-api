@@ -39,34 +39,39 @@ module.exports = {
   },
 
   updateById: function(req, res, next) {
-    postModel.findOneAndUpdate(
-      {
-        _id: req.params.postId,
-        author: req.body.userId,
-      },
-      {
-        caption: req.body.caption,
-        body: req.body.body,
-        edited_on: new Date(),
-      },
-      function(err, dbRes) {
-        if (err) {
-          next(err)
+    // find a post using a specific id that belongs to the user
+    // user id comes from user validator
+    const filter = {
+      _id: req.params.postId,
+      author: req.body.userId,
+    }
+
+    const { body, caption } = req.body
+
+    // update caption and/or body
+    const update = {
+      ...(caption && { caption }),
+      ...(body && { body }),
+      edited_on: new Date(),
+    }
+
+    postModel.findOneAndUpdate(filter, update, function(err, dbRes) {
+      if (err) {
+        next(err)
+      } else {
+        if (dbRes) {
+          res.json({
+            status: 'success',
+            message: 'post updated successfully',
+          })
         } else {
-          if (dbRes && dbRes.updatedCount === 1) {
-            res.json({
-              status: 'success',
-              message: 'post updated successfully',
-            })
-          } else {
-            res.json({
-              status: 'error',
-              message: 'post was not updated',
-            })
-          }
+          res.json({
+            status: 'error',
+            message: 'post was not updated',
+          })
         }
       }
-    )
+    })
   },
 
   deleteById: function(req, res, next) {
