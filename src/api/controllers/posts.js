@@ -40,7 +40,7 @@ module.exports = {
 
   updateById: function(req, res, next) {
     // find a post using a specific id that belongs to the user
-    // user id comes from user validator
+    // user id is added to request during user validation by deconding jwt token
     const filter = {
       _id: req.params.postId,
       author: req.body.userId,
@@ -75,7 +75,8 @@ module.exports = {
   },
 
   deleteById: function(req, res, next) {
-    // make sure user only deletes their own post
+    // find a specific post and delete it if it belongs to curren user
+    // user id is added to request during user validation by deconding jwt token
     postModel.deleteOne(
       {
         _id: req.params.postId,
