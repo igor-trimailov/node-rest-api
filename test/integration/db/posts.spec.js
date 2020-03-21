@@ -21,7 +21,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
   // init mongo db connection
   beforeAll(async () => {
-    const url = `mongodb://127.0.0.1/test`
+    const url = `mongodb://127.0.0.1:27017/test`
     await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -33,16 +33,17 @@ describe('User Model Integration Test using local mongo db', () => {
     await removeAllUsers()
     await removeAllPosts()
 
-    const addUser = await request(app)
-      .post('/users/register')
-      .send('name=Zed&email=zed@dead.com&password=Password1')
+    // add user
+    await request(app)
+      .post('/api/v1/users/register')
+      .send('name=Zed&email=zed@dead.com&password=Password123')
 
     const authUser = await request(app)
-      .post('/users/authenticate')
-      .send('email=zed@dead.com&password=Password1')
+      .post('/api/v1/users/authenticate')
+      .send('email=zed@dead.com&password=Password123')
 
-    userId = mongoose.Types.ObjectId(authUser.body.data.user.id)
-    userToken = authUser.body.data.user.token
+    userId = mongoose.Types.ObjectId(authUser.body.data.id)
+    userToken = authUser.body.data.token
   })
 
   // cleanup: clear users table after each test
@@ -60,7 +61,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should save new post to database that belongs to current user', async done => {
     const res = await request(app)
-      .post('/posts')
+      .post('/api/v1/posts')
       .set('x-access-token', userToken)
       .send('caption=TestCaption&body=TestBody')
 
@@ -79,7 +80,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should not update selected post in the database if it belongs to another user', async done => {
     const insert = await request(app)
-      .post('/posts')
+      .post('/api/v1/posts')
       .set('x-access-token', userToken)
       .send('caption=TestCaption&body=TestBody')
 
@@ -88,25 +89,25 @@ describe('User Model Integration Test using local mongo db', () => {
     const postId = insert.body.data._id
 
     const update = await request(app)
-      .put(`/posts/${postId}`)
+      .put(`/api/v1/posts/${postId}`)
       .set('x-access-token', userToken)
       .send('caption=UpdatedCaption&body=UpdatedBody')
 
     expect(update.statusCode).toEqual(200)
 
     const post = await Post.findOne({
-      _id: postId
+      _id: postId,
     })
 
     expect(post.caption).toBe('UpdatedCaption')
-    expect(post.body).toBe('UpdatedBody')  
+    expect(post.body).toBe('UpdatedBody')
 
     done()
   })
 
   it('Should update selected post in the database if it belongs to current user', async done => {
     const insert = await request(app)
-      .post('/posts')
+      .post('/api/v1/posts')
       .set('x-access-token', userToken)
       .send('caption=TestCaption&body=TestBody')
 
@@ -116,7 +117,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
     // simulate another user by sending random access token
     const update = await request(app)
-      .put(`/posts/${postId}`)
+      .put(`/api/v1/posts/${postId}`)
       .set('x-access-token', 123456789)
       .send('caption=UpdatedCaption&body=UpdatedBody')
 
@@ -129,7 +130,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should delete selected post from the database if it belongs to current user', async done => {
     const insert = await request(app)
-      .post('/posts')
+      .post('/api/v1/posts')
       .set('x-access-token', userToken)
       .send('caption=TestCaption&body=TestBody')
 
@@ -138,7 +139,7 @@ describe('User Model Integration Test using local mongo db', () => {
     const postId = insert.body.data._id
 
     const update = await request(app)
-      .delete(`/posts/${postId}`)
+      .delete(`/api/v1/posts/${postId}`)
       .set('x-access-token', userToken)
 
     expect(update.statusCode).toEqual(200)
@@ -150,7 +151,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should not delete selected post from the database if it belongs to another user', async done => {
     const insert = await request(app)
-      .post('/posts')
+      .post('/api/v1/posts')
       .set('x-access-token', userToken)
       .send('caption=TestCaption&body=TestBody')
 
@@ -160,7 +161,7 @@ describe('User Model Integration Test using local mongo db', () => {
 
     // simulate another user by sending random access token
     const update = await request(app)
-      .delete(`/posts/${postId}`)
+      .delete(`/api/v1/posts/${postId}`)
       .set('x-access-token', 123456789)
 
     expect(update.statusCode).toEqual(200)

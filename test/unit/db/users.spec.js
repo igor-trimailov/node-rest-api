@@ -4,7 +4,7 @@ const UserModel = require('../../../src/api/models/user')
 const userData = {
   name: 'JestUser',
   email: 'jest@email.com',
-  password: 'Password1',
+  password: 'Password123',
 }
 
 describe('User Model Unit Test using in-memory mongo db', () => {

@@ -11,10 +11,11 @@ async function removeAllUsers() {
 describe('User Model Integration Test using local mongo db', () => {
   // init mongo db connection
   beforeAll(async () => {
-    const url = `mongodb://127.0.0.1/test`
+    const url = `mongodb://127.0.0.1:27017/test`
     await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useFindAndModify: false,
     })
 
     // clear table before tests to make sure it does not contain test data
@@ -34,8 +35,10 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should save new user to database', async done => {
     const res = await request(app)
-      .post('/users/register')
-      .send('name=Zed&email=zed@dead.com&password=Password1')
+      .post('/api/v1/users/register')
+      .send('name=Zed&email=zed@dead.com&password=Password123')
+
+    // console.warn("POOP-1", res)
 
     expect(res.statusCode).toEqual(200)
 
@@ -51,21 +54,23 @@ describe('User Model Integration Test using local mongo db', () => {
 
   it('Should not save new user to database if the same name already exists', async done => {
     const resFirst = await request(app)
-      .post('/users/register')
-      .send('name=Zed&email=zed@dead.com&password=Password1')
+      .post('/api/v1/users/register')
+      .send('name=Zed&email=zed@dead.com&password=Password123')
 
     expect(resFirst.statusCode).toEqual(200)
 
     const resSecond = await request(app)
-      .post('/users/register')
-      .send('name=Zed&email=zed@dead.com&password=Password1')
+      .post('/api/v1/users/register')
+      .send('name=Zed&email=zed@dead.com&password=Password123')
 
     expect(resSecond.statusCode).toEqual(422)
 
     expect(resSecond.body).toEqual({
       status: 'error',
-      message: 'duplicate user',
-      data: { email: 'zed@dead.com' },
+      message: 'Validation error',
+      data: {
+        message: 'User name or password already in use',
+      },
     })
 
     done()
