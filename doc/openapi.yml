@@ -4,17 +4,17 @@ info:
   version: "1.0"
   title: Blog API
   description: "Simple API server that is able do CRUD operations on a MongoDB and authenticate users using JWT tokens. The current implementation immitates blog api.  <br /> <br /> The sections below provide reference documentation for the endpoints in the Blog REST API.  To make a request:<br /> <ol> <li>Expand an <b>endpoint</b>. </li> <li>Click <b>Try it out</b>. </li> <li>Customize the request body parameter.</li> <li>Click <b>Execute</b>. You will see the cURL request submitted to the API server and the corresponding response.</li></ol>"
-  contact:
-    name: Igor
-    url: https://www.linkedin.com/in/igortrimailov/
-
 servers:
-  - url: http://localhost:5000/api/v1
-    description: Local server
+  - url: "http://localhost:5000/api/v1"
+    description: "Local server"
+  - url: "https://stark-brushlands-58685.herokuapp.com/api/v1"
+    description: "Production server"
 
 tags:
 - name: "Users"
   description: "User management"
+- name: "Posts"
+  description: "Blog post management"
 
 paths:
   /users/register:
@@ -26,16 +26,34 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CreateUser'
       responses:
           "200":
             description: "Successful registration"
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/200"
           "422":
             description: "Validation error"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status: 
+                      type: string
+                      example: "error"
+                    message: 
+                      type: string
+                      example: "Validation error"
+                    data: 
+                      type: object
+                      properties:
+                        message: 
+                          type: string
+                          example: "User name or password already in use"
+                        
 
       parameters:
       - in: "query"
@@ -43,7 +61,7 @@ paths:
         description: "Created user object"
         required: true
         schema:
-          $ref: "#/components/schemas/User"
+          $ref: "#/components/schemas/CreateUser"
   /users:
     get:
       tags: [Users]
@@ -54,11 +72,306 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserListResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "user list found"
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                            title: "User response"
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: "5e711a37d1e2f09b068ca714"
+                              name:
+                                type: string
+                                example: "Madi"
+                              email:
+                                type: string
+                                example: "email@example.com"
+  /users/authenticate:
+    post:
+      tags: [Users]
+      summary: "Authenticate an user"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+              
+      responses:
+        200:
+          description: "Successful authentication request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: string
+                    example: "success"
+                  message: 
+                    type: string
+                    example: "user authenticated"
+                  data:
+                    type: object
+                    properties:
+                      id: 
+                        type: string
+                        example: "5e74ba6c71f88c2953091aa3"
+                      name: 
+                        type: string
+                        example: "username"
+                      token: 
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNzRiYTZjNzFmODhjMjk1MzA5MWFhMyIsImlhdCI6MTU4NDcwODIyMSwiZXhwIjoxNTg0Nzk0NjIxfQ.OiPTtJzr9nCwtxh3i279MLYcBuq4nAzgieff46NeQrQ"
+                      "expiration": 
+                        type: string
+                        example: '2020-03-21T12:43:41.698Z'
+        401:
+          description: "Unauthorized. Invalid credentials"
+  /users/recover:
+    post:
+      tags: [Users]
+      summary: "Recover user password"
+      description: "This allows users to reset their forgotten password. <ul><li>It generates a token with a short lifespan.</li> <li>It sends the token to the user as a link: https://domain/reset?token=12345.</li> <li>It saves the token in the database.</li></ul>"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                    type: string
+                recoveryToken:
+                    type: string
+                password:
+                    type: string
+      responses:
+        200:
+          description: "Successful request. Recovery email sent."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200"
+  /users/reset:
+    post:
+      tags: [Users]
+      summary: "Reset user password"
+      description: "This allows the reset of forgotten user password: <ul><li>It checks if the user and the token are legit and not expired. </li> <li>It updates the password in the database if the previous checks pass.</li></ul> <br /><b>Note:</b>This request requires a valid token, therefore it depends on the user receiving the email sent by the post/recover request and clicking on the link."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                  email:
+                    type: string
+      responses:
+        200:
+          description: "Password successfully reset."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200"
+  /posts:
+    get:
+      tags: [Posts]
+      summary: "List all blog posts"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "posts list found"
+                  data:
+                    properties:
+                      posts:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Post"
+    post:
+      tags: [Posts]
+      summary: "Add a new blog post"
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      parameters:
+      - in: "query"
+        name: "body"
+        description: "Created post object"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Post"
+      responses:
+          200:
+            description: "Post created successfully"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                    message:
+                      type: string
+                    data:
+                      $ref: "#/components/schemas/Post"
+          400:
+            description: "Post not found"
+      
+  /posts/{postId}:
+    get:
+      tags: [Posts]
+      summary: "Return a certain post by post ID"
+      operationId: "getById"
+      parameters: 
+      - name: "postId"
+        in: "path"
+        description: "Id of the post to be returned"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+            description: "Post returned successfully"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                    message:
+                      type: string
+                    data:
+                      $ref: "#/components/schemas/Post"
+    put:
+      tags: [Posts]
+      summary: "Update an existing post"
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      parameters: 
+        - in: "path"
+          name: "postId"
+          description: "Id of the post to be returned"
+          required: true
+          schema:
+            type: string
+            
+        - in: "query"
+          name: "body"
+          description: "Post object that needs to be updated"
+          required: true
+          schema:
+            $ref: "#/components/schemas/CreatePost"
+      responses:
+        200:
+          description: "Post update successful"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags: [Posts]
+      summary: "Delete an existing post"
+      security:
+        - ApiKeyAuth: []
+      
+      parameters: 
+        - in: "path"
+          name: "postId"
+          description: "Id of the post to be returned"
+          required: true
+          schema:
+            type: string
+        
+      responses:
+        200:
+          description: "Post deleted successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200"
+        500:
+          description: "Internal Server Error"
 components:
+  securitySchemes:
+   ApiKeyAuth:
+      type: "apiKey"
+      in: "header"
+      name: "x-access-token"
   schemas:
-    User:
+    200:
+      type: object
+      title: "Success reponse"
+      properties:
+        status:
+          type: string
+          example: "Success"
+        message:
+          type: string
+          example: "Operation successful"
+    CreateUser:
       title: "Create a new user"
+      type: object
+      required:
+      - name
+      - email
+      - password
+      properties:
+        name:
+          type: string
+          description: "Name of the user. Needs to be unique"
+        email:
+          type: string
+          description: "Email of the user needs to be unique. Used as a login. Needs to be unique."
+        password:
+          type: string
+          description: "Password of the user"
+    User:
+      title: "User"
       type: object
       required:
       - name
@@ -83,37 +396,43 @@ components:
         recoveryTokenExp:
           type: string
           description: "An ISO date representing the password token expiry date."
+    Post:
+      title: "Blog post"
+      type: object
+      properties:
+        _id:
+          type: string
+          description: "The unique ID of the blog post"
+        caption:
+          type: string
+          description: "The title of the blog post"
+        body:
+          type: string
+          description: "The body of the blog post"
+        posted_on:
+          type: string
+          description: "The date the blog post was created"
+          example: "2020-03-21T21:05:45.021Z"
+        author:
+          description: "The unique string identifying the author of the blog post. Generated programatically."
+          type: string
+        "__v":
+          type: string
+          description: "We don't yet know how this got here :) "
+          
+    CreatePost:
+      title: "Create a new blog post"
+      type: object
+      required:
+      - caption
+      - body
+      properties:
+        caption:
+          type: string
+          description: "The title of the blog post"
+        body:
+          type: string
+          description: "The body of the blog post"
     
-    UserResponse:
-      title: "User response"
-      type: object
-      properties:
-        id:
-          type: string
-          example: "5e711a37d1e2f09b068ca714"
-        name:
-          type: string
-          example: "Madi"
-        email:
-          type: string
-          example: "email@example.com"
-    UserListResponse:
-      title: "User list response"
-      type: object
-      properties:
-        status:
-          type: string
-          example: "success"
-        message:
-          type: string
-          example: "user list found"
-        data:
-          type: object
-          properties:
-            users:
-              type: array
-              items:
-                  $ref: "#/components/schemas/UserResponse"
-externalDocs:
-  description: Documentation and main site (TBD)
-  url: https://sunrise-sunset.org/api
+
+  
